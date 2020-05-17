@@ -1,51 +1,54 @@
-import React, { useState, useEffect } from "react";
-import api from './services/api';
+import React from "react";
 
 import "./styles.css";
 
+import { useState, useEffect } from 'react';
+import api from './services/api';
+
 function App() {
 
-  const [listaRepositories, setRepository] = useState([]);
+  const [repositoriesList, setRepositories] = useState([]);
 
   useEffect(() => {
     api.get('repositories').then(response => {
-      setRepository(response.data);
-    });
-  }, []);
-
+      setRepositories(response.data);
+    })
+  }, [])
 
   async function handleAddRepository() {
-    const response = await api.post('repositories', {
-      title: `Novo Projeto ${Date.now()}`,
-      url: "none",
-      techs: ["none"]
-    });
+    const repository = await api.post('repositories', {
+      title: "Repository",
+      url: 'http://github.com/thiagocdn',
+      techs: ["ReactJS"]
+    })
 
-    const repository = response.data;
-
-    setRepository([...listaRepositories, repository]);
-
+    setRepositories([...repositoriesList, repository.data])
   }
 
   async function handleRemoveRepository(id) {
-    await api.delete(`repositories/${id}`);
-    
-    setRepository(listaRepositories.filter(response => response.id !== id));
+    await api.delete(`repositories/${id}`)
+
+    setRepositories(repositoriesList.filter(repository => repository.id !== id));
   }
+
 
   return (
     <div>
       <ul data-testid="repository-list">
-        {listaRepositories.map(repository => 
-
+        {repositoriesList.map(repository => 
           <li key={repository.id}>
-            {repository.title}
+
+            <ul>
+              <li><a href={repository.url} target="_blank">{repository.title}</a></li>
+              <li>Likes: {repository.likes}</li>
+            </ul>
+
             <button onClick={() => handleRemoveRepository(repository.id)}>
               Remover
             </button>
+
           </li>
-        
-        )}
+          )}
       </ul>
 
       <button onClick={handleAddRepository}>Adicionar</button>
